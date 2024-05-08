@@ -14,7 +14,6 @@ function LoginForm() {
     })
 
     const [errorMessage, setErrorMessage] = useState(null)
-
     
     async function handleSubmit(e) {
         e.preventDefault();
@@ -30,7 +29,6 @@ function LoginForm() {
     
             const data = await response.json();
     
-        
             if (response.ok) {  
                 setCurrentUser(data.user);
                 localStorage.setItem('token', data.token);
