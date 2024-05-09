@@ -91,27 +91,43 @@ router.post('/:placeId/comments', async (req, res) => {
     })
 
     if (!place) {
-        res.status(404).json({ message: `Could not find place with id "${placeId}"` })
+        return res.status(404).json({ message: `Could not find place with id "${placeId}"` })
     }
 
-    const author = await User.findOne({
-        where: { userId: req.body.authorId }
-    })
+    let currentUser;
+    try {
+        const [method, token] = req.headers.authorization.split(' ')
+        if (method == 'Bearer') {
+            const result = await jwt.decode(process.env.JWT_SECRET, token)
+            const { id } = result.value
+            currentUser = await User.findOne({
+                where: {
+                    userId: id 
+                }
+            })
+        }
+    } catch {
+        currentUser = null
+    }
 
-    if (!author) {
-        res.status(404).json({ message: `Could not find author with id "${req.body.authorId}"` })
+    if (!req.currentUser) {
+        return res.status(404).json({
+            message: 'You gotta be logged in bruh.'
+        })
     }
 
     const comment = await Comment.create({
         ...req.body,
+        authorId: req.currentUser.userId,
         placeId: placeId
     })
 
     res.send({
         ...comment.toJSON(),
-        author
+        author: req.currentUser
     })
 })
+
 
 router.delete('/:placeId/comments/:commentId', async (req, res) => {
     let placeId = Number(req.params.placeId)

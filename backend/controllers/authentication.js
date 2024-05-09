@@ -23,29 +23,7 @@ router.post('/', async (req, res) => {
 })
 
 router.get('/profile', async (req, res) => {
-    try {
-        // This splits the authorization header into [ "Bearer", "TOKEN" ]:
-        const [authenticationMethod, token] = req.headers.authorization.split(' ')
-
-        // Only "Bearer authoriztion" add other authorization strats later
-        if (authenticationMethod == 'Bearer') {
-
-            // Decode JWT
-            const result = await jwt.decode(process.env.JWT_SECRET, token)
-
-            // Get User id from payload
-            const { id } = result.value
-
-            let user = await User.findOne({
-                where: {
-                    userId: id
-                }
-            })
-            res.json(user)
-        }
-    } catch {
-        res.json(null)
-    }
+    res.json(req.currentUser)
 })
 
 module.exports = router
